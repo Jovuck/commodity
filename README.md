@@ -17,3 +17,7 @@ This repository contains a suite of quantitative analysis tools specifically des
 - Backtesting of a **Trend Following** strategy (Moving Average Crossover).
 - Comparative performance analysis between **Gold (GC=F)** and **Brent Crude Oil (BZ=F)**.
 - Integration of **transaction costs** (slippage/commissions) and **Sharpe Ratio** calculation.
+  
+## 🛠️ Installation
+```bash
+pip install -r requirements.txt
