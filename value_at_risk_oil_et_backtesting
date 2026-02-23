@@ -4,28 +4,34 @@ import pandas as pd
 
 class RiskManager:
     def __init__(self, ticker):
-        # 1. Téléchargement et nettoyage strict du MultiIndex de yfinance
+        # 1. Download and strictly clean yfinance MultiIndex structure
         df = yf.download(ticker, start="2022-01-01")
         if isinstance(df.columns, pd.MultiIndex):
             self.data = df['Close'][ticker]
         else:
             self.data = df['Close']
             
-        # 2. Calcul des rendements (on enlève les NaN)
+        # 2. Calculate log-returns (dropping NaN values)
         self.returns = np.log(self.data / self.data.shift(1)).dropna()
 
     def backtest_var(self, confidence=0.95):
+        """
+        Performs a rolling Historical VaR backtest.
+        - confidence: Confidence level (e.g., 0.95 for 95% VaR)
+        - window: 252-day trading window (1 year)
+        """
         window = 252
-        # 3. Calcul de la VaR glissante (on veut le quantile du bas, ex: 0.05)
-        # On calcule le quantile sur les rendements réels
+        
+        # 3. Compute Rolling Historical VaR
+        # We target the lower tail quantile (e.g., 0.05 for 95% confidence)
         var_series = self.returns.rolling(window=window).quantile(1 - confidence).dropna()
         
-        # 4. Alignement
+        # 4. Align returns with the VaR series index
         aligned_returns = self.returns.loc[var_series.index]
         
-        # 5. TEST CRUCIAL : Une exception est quand Rendement < VaR
-        # Comme VaR est négatif (ex: -0.03) et Rendement est négatif (ex: -0.04)
-        # -0.04 < -0.03 est VRAI -> C'est une exception.
+        # 5. CRITICAL TEST: A breach (exception) occurs when Return < VaR level
+        # Since VaR is negative (e.g., -3%) and Return is more negative (e.g., -4%),
+        # -0.04 < -0.03 is TRUE -> This is a VaR breach.
         exceptions = aligned_returns[aligned_returns < var_series]
         
         failure_rate = len(exceptions) / len(aligned_returns)
@@ -39,12 +45,15 @@ class RiskManager:
             "Mean VaR": var_series.mean()
         }
 
-# --- TEST ---
-risk = RiskManager("BZ=F")
+# --- EXECUTION & BACKTESTING ---
+risk = RiskManager("BZ=F") # Brent Crude Oil
 for conf in [0.95, 0.99]:
     res = risk.backtest_var(conf)
-    print(f"\n--- Results for VaR {res['Confidence']*100:.0f}% ---")
-    print(f"Mean VaR Level: {res['Mean VaR']:.2%}")
-    print(f"Exceptions: {res['Exceptions']} / {res['Total Days']}")
+    print(f"\n--- Results for {res['Confidence']*100:.0f}% VaR ---")
+    print(f"Mean VaR Level   : {res['Mean VaR']:.2%}")
+    print(f"Breaches Found   : {res['Exceptions']} / {res['Total Days']}")
     print(f"Real Failure Rate: {res['Failure Rate']:.2%}")
-    print(f"Status: {'VALID' if res['Failure Rate'] < 0.10 else 'ERROR'}")
+    
+    # Status check based on acceptable deviation from the expected rate
+    # For a 95% VaR, we expect a 5% failure rate.
+    print(f"Status           : {'VALID' if res['Failure Rate'] < (res['Expected Rate'] * 1.5) else 'REVIEW REQUIRED'}")
