@@ -40,7 +40,7 @@ It integrates three main PROJECTS: derivative pricing, risk management, and algo
 
 - **Language**: Python 3.9+ (All comments and documentation in English)
 - **Data Source**: Yahoo Finance API (yfinance)
-- **Libraries used**: NumPy (Vectorized math), Pandas (Time-series), Matplotlib (Visualization), SciPy (Statistics)
+- **Libraries used**: NumPy, Pandas, Matplotlib, SciPy, yfinance
   
 ```bash
 pip install -r requirements.txt
