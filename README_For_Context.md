@@ -13,7 +13,7 @@ It integrates three main PROJECTS: derivative pricing, risk management, and algo
 - **Methodology**: Implementation of the **Black-Scholes-Merton** (BSM) model compared against a **Monte Carlo** (MC) simulation with 250,000 trajectories
 - **Data Calibration**: Models are calibrated using **Historical Volatility** (log-returns standard deviation) and the **10-Year Treasury Note** as the risk-free rate ($r$). And historical volatility is extracted from **yahoo finance**.
 - **Risk Metrics**: Calculation of Greeks ($\Delta, \Gamma, \nu, \theta, \rho$) to demonstrate how price sensitivity evolves with market movements.
-
+- **conclusion**: The Monte Carlo engine serves to validate the BSM price, demonstrating that as $N \to \infty$, the numerical estimate converges to the theoretical price, ensuring accuracy for complex instruments.
 
 ### PROJECT 2: Market Risk - Value at Risk (VaR)
 
